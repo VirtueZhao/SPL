@@ -151,7 +151,6 @@ class BaseTrainer:
             self.before_epoch()
             self.run_epoch()
             self.after_epoch()
-            exit()
         self.after_train()
 
     def before_train(self):
@@ -285,9 +284,14 @@ class GenericTrainer(BaseTrainer):
         batch_time = AverageMeter()
         data_time = AverageMeter()
         end_time = time.time()
+
+        print(self.train_data_loader.sampler)
+        examples_difficulty = []
+
         for self.batch_index, batch_data in enumerate(self.train_data_loader):
             data_time.update(time.time() - end_time)
-            loss_summary = self.forward_backward(batch_data)
+            loss_summary, difficulty = self.forward_backward(batch_data)
+            examples_difficulty.extend(difficulty)
             batch_time.update(time.time() - end_time)
             losses.update(loss_summary)
 
@@ -312,6 +316,11 @@ class GenericTrainer(BaseTrainer):
             self.write_scalar("train/lr", self.get_current_lr(), n_iter)
 
             end_time = time.time()
+
+        for difficulty in examples_difficulty:
+            print("Image ID: {}".format(difficulty[0]))
+            print("Image Difficulty: {}".format(difficulty[1]))
+        exit()
 
     def after_train(self):
         print("Finish Training")

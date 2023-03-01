@@ -127,19 +127,15 @@ def compute_top_k_accuracy(output, class_label, top_k=1):
     return results
 
 
+def compute_gradients_length(gradients, channel=False):
+    if channel:
+        length = 0
+        for g in gradients:
+            g = g.flatten()
+            length += np.linalg.norm(g)
+        length = length / len(gradients)
+    else:
+        g = gradients.flatten()
+        length = np.linalg.norm(g)
 
-    # results = []
-    # for k in top_k:
-    #     correct_num_k = correct[:k]
-
-
-
-    # pred = pred.t()
-    # print(pred)
-    # print(class_label)
-
-    result = []
-
-
-
-    exit()
+    return length
