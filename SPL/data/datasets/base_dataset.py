@@ -14,13 +14,18 @@ class Datum:
         domain_label (int): domain label.
         class_name (str): class name.
     """
-    def __init__(self, img_path, class_label, domain_label, class_name):
+    def __init__(self, img_id, img_path, class_label, domain_label, class_name):
         assert isinstance(img_path, str)
         assert check_is_file(img_path)
+        self._img_id = img_id
         self._img_path = img_path
         self._class_label = class_label
         self._domain_label = domain_label
         self._class_name = class_name
+
+    @property
+    def img_id(self):
+        return self._img_id
 
     @property
     def img_path(self):

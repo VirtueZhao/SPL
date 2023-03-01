@@ -144,6 +144,7 @@ class DatasetWrapper(Dataset):
         datum = self.data_source[index]
 
         output = {
+            "img_id": datum.img_id,
             "img_path": datum.img_path,
             "domain_label": datum.domain_label,
             "class_label": datum.class_label,

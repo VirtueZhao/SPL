@@ -91,10 +91,6 @@ def main(args):
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
 
-    print("** Config **")
-    print(cfg)
-    exit()
-
     trainer = build_trainer(cfg)
     trainer.train()
 

@@ -151,6 +151,7 @@ class BaseTrainer:
             self.before_epoch()
             self.run_epoch()
             self.after_epoch()
+            exit()
         self.after_train()
 
     def before_train(self):
@@ -257,13 +258,32 @@ class GenericTrainer(BaseTrainer):
         self.init_writer(writer_dir)
         self.time_start = time.time()
 
+        self.init_easy_cl_loss_weight = 1 + self.cfg.CURRICULUM.GCDM.ETA
+        self.init_hard_cl_loss_weight = 1 - self.cfg.CURRICULUM.GCDM.ETA
+        self.epoch_step_size = (self.init_hard_cl_loss_weight - self.init_easy_cl_loss_weight) / (self.max_epoch - 1)
+
+        curriculum_detail_table = [
+            ["Parameter", "Values"],
+            ["Init Easy Loss Weight", f"{self.init_easy_cl_loss_weight}"],
+            ["Init Hard Hard Weight", f"{self.init_hard_cl_loss_weight}"],
+            ["Epoch Step Size", f"{self.epoch_step_size}"],
+        ]
+        print("Curriculum Detail")
+        print(tabulate(curriculum_detail_table))
+
+    def before_epoch(self):
+        self.current_easy_loss_weight = self. init_easy_cl_loss_weight + self.epoch_step_size * self.current_epoch
+        self.current_hard_loss_weight = 2 - self.current_easy_loss_weight
+        self.num_batches = len(self.train_data_loader)
+        self.batch_step_size = (self.current_hard_loss_weight - self.current_easy_loss_weight) / (self.num_batches - 1)
+        print()
+        print("Current Batch Step Size: {}".format(self.batch_step_size))
+
     def run_epoch(self):
         self.set_model_mode("train")
         losses = MetricMeter()
         batch_time = AverageMeter()
         data_time = AverageMeter()
-        self.num_batches = len(self.train_data_loader)
-
         end_time = time.time()
         for self.batch_index, batch_data in enumerate(self.train_data_loader):
             data_time.update(time.time() - end_time)

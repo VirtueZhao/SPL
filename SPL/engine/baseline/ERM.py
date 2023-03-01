@@ -11,7 +11,7 @@ class ERM(GenericTrainer):
     """
 
     def forward_backward(self, batch_data):
-        input_data, class_label = self.parse_batch_train(batch_data)
+        img_id, input_data, class_label = self.parse_batch_train(batch_data)
         output = self.model(input_data)
         loss = F.cross_entropy(output, class_label)
         self.model_backward_and_update(loss)
@@ -24,9 +24,12 @@ class ERM(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
+        print(img_id)
+
         return loss_summary
 
     def parse_batch_train(self, batch_data):
+        img_id = batch_data["img_id"]
         input_data = batch_data["img"].to(self.device)
         class_label = batch_data["class_label"].to(self.device)
-        return input_data, class_label
+        return img_id, input_data, class_label
