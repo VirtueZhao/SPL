@@ -187,8 +187,11 @@ class BaseTrainer:
                 self._optimizers[model_name].zero_grad()
 
     def model_backward(self, loss):
-        self.detect_abnormal_loss(loss)
-        loss.backward()
+        # self.detect_abnormal_loss(loss)
+        if not torch.isfinite(loss).all():
+            print("Loss is Infinite or NaN. No Update.")
+        else:
+            loss.backward()
 
     def model_update_optimizer(self, model_names=None):
         model_names = self.get_model_names(model_names)
@@ -286,12 +289,13 @@ class GenericTrainer(BaseTrainer):
         end_time = time.time()
 
         print(self.train_data_loader.sampler)
-        examples_difficulty = []
+        self.examples_difficulty = []
 
         for self.batch_index, batch_data in enumerate(self.train_data_loader):
             data_time.update(time.time() - end_time)
+            self.current_batch_loss_weight = self.current_easy_loss_weight + self.batch_step_size * self.batch_index
             loss_summary, difficulty = self.forward_backward(batch_data)
-            examples_difficulty.extend(difficulty)
+            self.examples_difficulty.extend(difficulty)
             batch_time.update(time.time() - end_time)
             losses.update(loss_summary)
 
@@ -317,7 +321,8 @@ class GenericTrainer(BaseTrainer):
 
             end_time = time.time()
 
-        for difficulty in examples_difficulty:
+    def after_epoch(self):
+        for difficulty in self.examples_difficulty:
             print("Image ID: {}".format(difficulty[0]))
             print("Image Difficulty: {}".format(difficulty[1]))
         exit()
