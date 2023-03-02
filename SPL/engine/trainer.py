@@ -12,6 +12,8 @@ from SPL.model import build_backbone
 from SPL.optim import build_optimizer, build_lr_scheduler
 from SPL.evaluation import build_evaluator
 from torch.utils.tensorboard import SummaryWriter
+from SPL.data.data_manager import build_data_loader, DatasetWrapper
+from SPL.data.transforms import build_transform
 
 
 class GenericNet(nn.Module):
@@ -145,12 +147,11 @@ class BaseTrainer:
         """Generic Training Loops"""
         self.start_epoch = start_epoch
         self.max_epoch = max_epoch
-
         self.before_train()
         for self.current_epoch in range(self.start_epoch, self.max_epoch):
             self.before_epoch()
             self.run_epoch()
-            self.after_epoch()
+            # self.after_epoch()
         self.after_train()
 
     def before_train(self):
@@ -278,8 +279,6 @@ class GenericTrainer(BaseTrainer):
         self.current_hard_loss_weight = 2 - self.current_easy_loss_weight
         self.num_batches = len(self.train_data_loader)
         self.batch_step_size = (self.current_hard_loss_weight - self.current_easy_loss_weight) / (self.num_batches - 1)
-        print()
-        print("Current Batch Step Size: {}".format(self.batch_step_size))
 
     def run_epoch(self):
         self.set_model_mode("train")
@@ -288,7 +287,6 @@ class GenericTrainer(BaseTrainer):
         data_time = AverageMeter()
         end_time = time.time()
 
-        print(self.train_data_loader.sampler)
         self.examples_difficulty = []
 
         for self.batch_index, batch_data in enumerate(self.train_data_loader):
@@ -322,10 +320,24 @@ class GenericTrainer(BaseTrainer):
             end_time = time.time()
 
     def after_epoch(self):
-        for difficulty in self.examples_difficulty:
-            print("Image ID: {}".format(difficulty[0]))
-            print("Image Difficulty: {}".format(difficulty[1]))
-        exit()
+        # for difficulty in self.examples_difficulty:
+        #     print("Image ID: {}".format(difficulty[0]))
+        #     print("Image Difficulty: {}".format(difficulty[1]))
+
+        self.examples_difficulty.sort(key=lambda x: x[1], reverse=False)
+        data_source = []
+        for example in self.examples_difficulty:
+            data_source.append(self.data_manager.dataset.train_data[example[0]])
+
+        self.train_data_loader = build_data_loader(
+            cfg=self.cfg,
+            sampler_type="SequentialSampler",
+            data_source=data_source,
+            batch_size=self.cfg.DATALOADER.TRAIN.BATCH_SIZE,
+            transform=build_transform(self.cfg, is_train=True),
+            is_train=True,
+            dataset_wrapper=DatasetWrapper
+        )
 
     def after_train(self):
         print("Finish Training")

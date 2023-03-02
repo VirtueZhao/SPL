@@ -12,6 +12,7 @@ class ERM(GenericTrainer):
 
     def forward_backward(self, batch_data):
         img_id, input_data, class_label = self.parse_batch_train(batch_data)
+
         output = self.model(input_data)
         loss = F.cross_entropy(output, class_label)
         loss = loss * self.current_batch_loss_weight
