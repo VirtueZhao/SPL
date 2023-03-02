@@ -26,7 +26,7 @@ class ERM(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
-        examples_difficulty = self.compute_difficulty_score(type="GCDM", img_id=img_id, class_label=class_label, output=output, input_data_grad=input_data.grad)
+        examples_difficulty = self.compute_difficulty_score(img_id=img_id, class_label=class_label, output=output, input_data_grad=input_data.grad)
 
         return loss_summary, examples_difficulty
 
@@ -37,18 +37,15 @@ class ERM(GenericTrainer):
         class_label = batch_data["class_label"].to(self.device)
         return img_id, input_data, class_label
 
-    def compute_difficulty_score(self, type, img_id, class_label, output, input_data_grad):
+    def compute_difficulty_score(self, img_id, class_label, output, input_data_grad):
         examples_difficulty = []
 
-        if type == "GCDM":
-            for i in range(len(img_id)):
-                current_img_id = img_id[i].item()
-                current_class_label = class_label[i].item()
-                current_prediction_confidence = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_class_label]
-                current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
-                current_img_difficulty = current_gradients_length / current_prediction_confidence
-                examples_difficulty.append((current_img_id, current_img_difficulty))
-        else:
-            raise NotImplementedError("Difficulty Measure {} Not Implemented.".format(type))
+        for i in range(len(img_id)):
+            current_img_id = img_id[i].item()
+            current_class_label = class_label[i].item()
+            current_prediction_confidence = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_class_label]
+            current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
+            current_img_difficulty = current_gradients_length / current_prediction_confidence
+            examples_difficulty.append((current_img_id, current_img_difficulty))
 
         return examples_difficulty
