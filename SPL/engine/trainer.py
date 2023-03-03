@@ -151,7 +151,7 @@ class BaseTrainer:
         for self.current_epoch in range(self.start_epoch, self.max_epoch):
             self.before_epoch()
             self.run_epoch()
-            self.after_epoch()
+            # self.after_epoch()
         self.after_train()
 
     def before_train(self):

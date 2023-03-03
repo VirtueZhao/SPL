@@ -2,9 +2,9 @@ import torch
 from tabulate import tabulate
 from torch.nn import functional as F
 from SPL.engine.trainer import GenericNet
-from SPL.utils import count_num_parameters, compute_gradients_length
 from SPL.engine import TRAINER_REGISTRY, GenericTrainer
 from SPL.optim import build_optimizer, build_lr_scheduler
+from SPL.utils import count_num_parameters, compute_gradients_length
 
 @TRAINER_REGISTRY.register()
 class CrossGrad(GenericTrainer):

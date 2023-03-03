@@ -1,7 +1,7 @@
 import torch
 from torch.nn import functional as F
-from SPL.utils import compute_top_k_accuracy
 from SPL.engine import TRAINER_REGISTRY, GenericTrainer
+from SPL.utils import compute_top_k_accuracy, compute_gradients_length
 
 
 @TRAINER_REGISTRY.register()
@@ -34,7 +34,9 @@ class DomainMix(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
-        return loss_summary
+        examples_difficulty = []
+
+        return loss_summary, examples_difficulty
 
     def parse_batch_train(self, batch_data):
         input_data = batch_data["img"].to(self.device)
