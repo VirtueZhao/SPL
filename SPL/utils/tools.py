@@ -127,7 +127,7 @@ def compute_top_k_accuracy(output, class_label, top_k=1):
     return results
 
 
-def compute_gradients_length(gradients, channel=True):
+def compute_gradients_length(gradients, channel=False):
     if channel:
         length = 0
         for g in gradients:

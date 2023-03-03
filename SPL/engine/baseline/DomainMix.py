@@ -21,9 +21,10 @@ class DomainMix(GenericTrainer):
         self.dist_beta = torch.distributions.Beta(self.alpha, self.beta)
 
     def forward_backward(self, batch_data):
-        input_data, label_a, label_b, lam = self.parse_batch_train(batch_data)
+        img_id, input_data, label_a, label_b, lam = self.parse_batch_train(batch_data)
         output = self.model(input_data)
         loss = lam * F.cross_entropy(output, label_a) + (1 - lam) * F.cross_entropy(output, label_b)
+        loss = loss * self.current_batch_loss_weight
         self.model_backward_and_update(loss)
 
         loss_summary = {
@@ -34,18 +35,20 @@ class DomainMix(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
-        examples_difficulty = []
+        examples_difficulty = self.compute_difficulty(img_id=img_id, label_a=label_a, label_b=label_b,
+                                                      output=output, input_data_grad=input_data.grad)
 
         return loss_summary, examples_difficulty
 
     def parse_batch_train(self, batch_data):
+        img_id = batch_data["img_id"]
         input_data = batch_data["img"].to(self.device)
         class_label = batch_data["class_label"].to(self.device)
         domain_label = batch_data["domain_label"].to(self.device)
 
         input_data, label_a, label_b, lam = self.domain_mix(input_data, class_label, domain_label)
-
-        return input_data, label_a, label_b, lam
+        input_data.requires_grad = True
+        return img_id, input_data, label_a, label_b, lam
 
     def domain_mix(self, input_data, class_label, domain_label):
         if self.alpha > 0:
@@ -76,3 +79,20 @@ class DomainMix(GenericTrainer):
         mixed_input_data = lam * input_data + (1 - lam) * input_data[perm, :]
         label_a, label_b = class_label, class_label[perm]
         return mixed_input_data, label_a, label_b, lam
+
+    def compute_difficulty(self, img_id, label_a, label_b, output, input_data_grad):
+        alpha = 0.5
+        examples_difficulty = []
+
+        for i in range(len(img_id)):
+            current_img_id = img_id[i].item()
+            current_label_a = label_a[i].item()
+            current_label_b = label_b[i].item()
+            current_prediction_confidence_a = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_a]
+            current_prediction_confidence_b = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_b]
+            current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
+            current_img_difficulty = (1 - alpha) * (current_gradients_length / current_prediction_confidence_a) + \
+                                     alpha * (current_gradients_length / current_prediction_confidence_b)
+            examples_difficulty.append((current_img_id, current_img_difficulty))
+
+        return examples_difficulty
