@@ -3,9 +3,9 @@ from tabulate import tabulate
 from torch.nn import functional as F
 from SPL.model import build_network
 from SPL.engine.trainer import GenericNet
-from SPL.utils import count_num_parameters
 from SPL.engine import TRAINER_REGISTRY, GenericTrainer
 from SPL.optim import build_optimizer, build_lr_scheduler
+from SPL.utils import count_num_parameters, compute_gradients_length
 
 
 @TRAINER_REGISTRY.register()
@@ -55,7 +55,7 @@ class DDAIG(GenericTrainer):
         print(tabulate(model_parameters_table))
 
     def forward_backward(self, batch_data):
-        input_data, class_label, domain_label = self.parse_batch_train(batch_data)
+        img_id, input_data, class_label, domain_label = self.parse_batch_train(batch_data)
 
         #############
         # Update Domain Transformation Net
@@ -73,13 +73,23 @@ class DDAIG(GenericTrainer):
         with torch.no_grad():
             input_data_p = self.domain_transformation_net(input_data, lmda=self.lmda)
 
+        input_data.requires_grad = True
+        input_data_p.requires_grad = True
+
         #############
         # Update Label Classifier
         #############
-        loss_l = F.cross_entropy(self.label_classifier(input_data), class_label)
-        loss_lp = F.cross_entropy(self.label_classifier(input_data_p), class_label)
+        pred_l = self.label_classifier(input_data)
+        loss_l = F.cross_entropy(pred_l, class_label)
+        pred_lp = self.label_classifier(input_data_p)
+        loss_lp = F.cross_entropy(pred_lp, class_label)
         loss_l = (1.0 - self.alpha) * loss_l + self.alpha * loss_lp
+        loss_l = loss_l * self.current_batch_loss_weight
         self.model_backward_and_update(loss_l, "label_classifier")
+
+        examples_difficulty = self.compute_difficulty(img_id=img_id, class_label=class_label, pred_l=pred_l,
+                                                      pred_lp=pred_lp, input_data_grad=input_data.grad,
+                                                      input_data_p_grad=input_data_p.grad)
 
         #############
         # Update Domain Classifier
@@ -88,7 +98,7 @@ class DDAIG(GenericTrainer):
         self.model_backward_and_update(loss_d, "domain_classifier")
 
         loss_summary = {
-            "loss_dt": loss_dt.item(),
+            # "loss_dt": loss_dt.item(),
             "loss_l": loss_l.item(),
             "loss_d": loss_d.item()
         }
@@ -96,13 +106,31 @@ class DDAIG(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
-        return loss_summary
+        return loss_summary, examples_difficulty
 
     def parse_batch_train(self, batch_data):
+        img_id = batch_data["img_id"]
         input_data = batch_data["img"].to(self.device)
         class_label = batch_data["class_label"].to(self.device)
         domain_label = batch_data["domain_label"].to(self.device)
-        return input_data, class_label, domain_label
+        return img_id, input_data, class_label, domain_label
 
     def model_inference(self, input_data):
         return self.label_classifier(input_data)
+
+    def compute_difficulty(self, img_id, class_label, pred_l, pred_lp, input_data_grad, input_data_p_grad):
+        examples_difficulty = []
+        alpha = 0.5
+
+        for i in range(len(img_id)):
+            current_img_id = img_id[i].item()
+            current_class_label = class_label[i].item()
+            current_prediction_confidence = F.softmax(pred_l[i], dim=0).cpu().detach().numpy()[current_class_label]
+            current_prediction_confidence_p = F.softmax(pred_lp[i], dim=0).cpu().detach().numpy()[current_class_label]
+            current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
+            current_gradients_length_p = compute_gradients_length(input_data_p_grad[i].cpu().numpy())
+            current_img_difficulty = (1 - alpha) * (current_gradients_length / current_prediction_confidence) + \
+                                     alpha * (current_gradients_length_p / current_prediction_confidence_p)
+            examples_difficulty.append((current_img_id, current_img_difficulty))
+
+        return examples_difficulty
