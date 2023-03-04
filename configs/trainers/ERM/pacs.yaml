@@ -6,6 +6,6 @@ DATALOADER:
 
 OPTIM:
   NAME: "sgd"
-  LR: 0.001
-  MAX_EPOCH: 5
+  LR: 0.01
+  MAX_EPOCH: 25
   LR_SCHEDULER: "cosine"

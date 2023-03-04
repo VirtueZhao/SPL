@@ -53,7 +53,7 @@ class PACS(BaseDataset):
             return img_paths
 
         img_datums = []
-
+        img_id = 0
         for domain_label, domain_name in enumerate(input_domains):
             data_dir = osp.join(self._split_dir, domain_name + "_test_kfold.txt")
             img_path_class_label_list = _load_img_paths(data_dir)
@@ -66,11 +66,13 @@ class PACS(BaseDataset):
                     class_name = str(img_path.split("\\")[-2].lower())
 
                 img_datum = Datum(
+                    img_id=img_id,
                     img_path=img_path,
                     class_label=class_label,
                     domain_label=domain_label,
                     class_name=class_name
                 )
+                img_id += 1
                 img_datums.append(img_datum)
 
         return img_datums
