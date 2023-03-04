@@ -96,12 +96,9 @@ def get_cfg_default():
     ###########################
     # Curriculum Learning
     ###########################
-    _C.CURRICULUM = CN()
-    _C.CURRICULUM.NAME = ""
-
-    # Gradient Confidence Difficulty Measure
-    _C.CURRICULUM.GCDM = CN()
-    _C.CURRICULUM.GCDM.ETA = 1.0
+    _C.SPL = CN()
+    _C.SPL.ETA = "1.0"
+    _C.SPL.CURRICULUM = "GCDM"
 
     ###########################
     # Train

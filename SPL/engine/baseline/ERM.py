@@ -11,9 +11,9 @@ class ERM(GenericTrainer):
     """
 
     def forward_backward(self, batch_data):
-        img_id, input_data, class_label = self.parse_batch_train(batch_data)
+        img_id, input, class_label = self.parse_batch_train(batch_data)
 
-        output = self.model(input_data)
+        output = self.model(input)
         loss = F.cross_entropy(output, class_label)
         loss = loss * self.current_batch_loss_weight
         self.model_backward_and_update(loss)
@@ -26,7 +26,7 @@ class ERM(GenericTrainer):
         if self.batch_index + 1 == self.num_batches:
             self.update_lr()
 
-        examples_difficulty = self.compute_difficulty_score(img_id=img_id, class_label=class_label, output=output, input_data_grad=input_data.grad)
+        examples_difficulty = self.compute_difficulty(img_id=img_id, class_label=class_label, output=output, input_grad=input.grad)
 
         return loss_summary, examples_difficulty
 
@@ -37,15 +37,27 @@ class ERM(GenericTrainer):
         class_label = batch_data["class_label"].to(self.device)
         return img_id, input_data, class_label
 
-    def compute_difficulty_score(self, img_id, class_label, output, input_data_grad):
+    def compute_difficulty(self, img_id, class_label, output, input_grad):
         examples_difficulty = []
 
         for i in range(len(img_id)):
             current_img_id = img_id[i].item()
             current_class_label = class_label[i].item()
+            current_loss = F.cross_entropy(output[i], class_label[i]).cpu().item()
             current_prediction_confidence = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_class_label]
-            current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
-            current_img_difficulty = current_gradients_length / current_prediction_confidence
+            current_gradients_length = compute_gradients_length(input_grad[i].cpu().numpy())
+
+            if self.cfg.SPL.CURRICULUM == "GCDM":
+                current_img_difficulty = current_gradients_length / current_prediction_confidence
+            elif self.cfg.SPL.CURRICULUM == "loss":
+                current_img_difficulty = current_loss
+            elif self.cfg.SPL.CURRICULUM == "confidence":
+                current_img_difficulty = current_prediction_confidence
+            elif self.cfg.SPL.CURRICULUM == "gradients":
+                current_img_difficulty = current_gradients_length
+            else:
+                raise NotImplementedError("Curriculum: {} Not Implemented.".format(self.cfg.SPL.CURRICULUM))
+
             examples_difficulty.append((current_img_id, current_img_difficulty))
 
         return examples_difficulty

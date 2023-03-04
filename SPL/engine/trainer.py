@@ -261,8 +261,8 @@ class GenericTrainer(BaseTrainer):
         self.init_writer(writer_dir)
         self.time_start = time.time()
 
-        self.init_easy_cl_loss_weight = 1 + self.cfg.CURRICULUM.GCDM.ETA
-        self.init_hard_cl_loss_weight = 1 - self.cfg.CURRICULUM.GCDM.ETA
+        self.init_easy_cl_loss_weight = 1 + self.cfg.SPL.ETA
+        self.init_hard_cl_loss_weight = 1 - self.cfg.SPL.ETA
         self.epoch_step_size = (self.init_hard_cl_loss_weight - self.init_easy_cl_loss_weight) / (self.max_epoch - 1)
 
         curriculum_detail_table = [
@@ -320,11 +320,15 @@ class GenericTrainer(BaseTrainer):
             end_time = time.time()
 
     def after_epoch(self):
+        if self.cfg.SPL.CURRICULUM == "confidence":
+            self.examples_difficulty.sort(key=lambda x: x[1], reverse=True)
+        else:
+            self.examples_difficulty.sort(key=lambda x: x[1], reverse=False)
+
         # for difficulty in self.examples_difficulty:
         #     print("Image ID: {}".format(difficulty[0]))
         #     print("Image Difficulty: {}".format(difficulty[1]))
 
-        self.examples_difficulty.sort(key=lambda x: x[1], reverse=False)
         data_source = []
         for example in self.examples_difficulty:
             data_source.append(self.data_manager.dataset.train_data[example[0]])

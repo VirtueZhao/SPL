@@ -57,10 +57,11 @@ def reset_cfg_from_args(cfg, args):
     if args.trainer:
         cfg.TRAINER.NAME = args.trainer
 
+    if args.eta:
+        cfg.SPL.ETA = args.eta
+
     if args.curriculum:
-        cfg.CURRICULUM.NAME = args.curriculum
-        if cfg.CURRICULUM.NAME == "GCDM":
-            cfg.CURRICULUM.GCDM.ETA = args.eta
+        cfg.SPL.CURRICULUM = args.curriculum
 
 
 def clean_cfg(cfg, trainer):
@@ -91,8 +92,8 @@ def main(args):
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
 
-    # print("** Config **")
-    # print(cfg)
+    print("** Config **")
+    print(cfg)
 
     trainer = build_trainer(cfg)
     trainer.train()
@@ -168,15 +169,16 @@ if __name__ == "__main__":
         help="name of trainers"
     )
     parser.add_argument(
-        "--curriculum",
-        type=str,
-        help="name of difficulty measure"
-    )
-    parser.add_argument(
         "--eta",
         type=float,
         help="pace parameter for gradient confidence difficulty measure"
     )
+    parser.add_argument(
+        "--curriculum",
+        type=str,
+        help="name of difficulty measure"
+    )
+
 
     args = parser.parse_args()
     main(args)
