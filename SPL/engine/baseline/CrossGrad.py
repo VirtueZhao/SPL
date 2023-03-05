@@ -111,6 +111,11 @@ class CrossGrad(GenericTrainer):
         for i in range(len(img_id)):
             current_img_id = img_id[i].item()
             current_class_label = class_label[i].item()
+            current_loss_l1 = F.cross_entropy(pred_l1[i], current_class_label)
+            current_loss_l2 = F.cross_entropy(pred_l2[i], current_class_label)
+
+
+
             current_prediction_confidence = F.softmax(pred_l1[i], dim=0).cpu().detach().numpy()[current_class_label]
             current_prediction_confidence_perturb = F.softmax(pred_l2[i], dim=0).cpu().detach().numpy()[current_class_label]
             current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
