@@ -88,11 +88,23 @@ class DomainMix(GenericTrainer):
             current_img_id = img_id[i].item()
             current_label_a = label_a[i].item()
             current_label_b = label_b[i].item()
+            current_loss_a = F.cross_entropy(output[i], label_a[i]).cpu().item()
+            current_loss_b = F.cross_entropy(output[i], label_b[i]).cpu().item()
             current_prediction_confidence_a = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_a]
             current_prediction_confidence_b = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_b]
             current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
-            current_img_difficulty = (1 - alpha) * (current_gradients_length / current_prediction_confidence_a) + \
-                                     alpha * (current_gradients_length / current_prediction_confidence_b)
+
+            if self.cfg.SPL.CURRICULUM == "GCDM":
+                current_img_difficulty = (1 - alpha) * (current_gradients_length / current_prediction_confidence_a) + \
+                                         alpha * (current_gradients_length / current_prediction_confidence_b)
+            elif self.cfg.SPL.CURRICULUM == "loss":
+                current_img_difficulty = (1 - alpha) * current_loss_a + alpha * current_loss_b
+            elif self.cfg.SPL.CURRICULUM == "confidence":
+                current_img_difficulty = (1 - alpha) * current_prediction_confidence_a + alpha * current_prediction_confidence_b
+            elif self.cfg.SPL.CURRICULUM == "gradients":
+                current_img_difficulty = current_gradients_length
+            else:
+                raise NotImplementedError("Curriculum: {} Not Implemented.".format(self.cfg.SPL.CURRICULUM))
             examples_difficulty.append((current_img_id, current_img_difficulty))
 
         return examples_difficulty
