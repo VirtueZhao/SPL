@@ -88,8 +88,8 @@ class DomainMix(GenericTrainer):
             current_img_id = img_id[i].item()
             current_label_a = label_a[i].item()
             current_label_b = label_b[i].item()
-            current_loss_a = F.cross_entropy(output[i], current_label_a).cpu().item()
-            current_loss_b = F.cross_entropy(output[i], current_label_b).cpu().item()
+            current_loss_a = F.cross_entropy(output[i], label_a[i]).cpu().item()
+            current_loss_b = F.cross_entropy(output[i], label_b[i]).cpu().item()
             current_prediction_confidence_a = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_a]
             current_prediction_confidence_b = F.softmax(output[i], dim=0).cpu().detach().numpy()[current_label_b]
             current_gradients_length = compute_gradients_length(input_data_grad[i].cpu().numpy())
