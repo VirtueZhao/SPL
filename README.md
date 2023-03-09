@@ -12,9 +12,9 @@ Our framework currently support five popular benchmark datasets:
 
 * **Office_Home**: Office-Home is initially introduced for domain adaptation and getting popular in the DG community. It contains four domains: Artistic, Clipart, Product, and Real World, where each domain has 65 classes related to office and home objects. There are 15,500 images in total, with an average of around 70 images per class and a maximum of 99 images in each class. The domain shift corresponds to the background, viewpoint and image style changes.
  
-* **VLCS**: 
+* **VLCS**: VLCS consists of four domains of data collected from Caltech101, PASCAL, LabelMe, and SUN, where five common categories are collected: bird, car, chair, dog and person. The domain shift corresponds to background and viewpoint changes.
 
-* **NICO++**:
+* **NICO++**: NICO++ is the latest DG dataset that was constructed in 2022 for OOD (Out-of-Distribution) image classification. The public version contains six domains: Autumn, Dim, Grass, Outdoor, Rock, and Water, where each domain has 60 classes. The domain shift corresponds to the context changes. Compared with the previous four datasets, NICO++ is much larger in scale with 88,866 images in total.
 
 **Note**: Digits, PACS, Office_Home, and VLCS datasets are small. They will be automatically downloaded when you run the codes. 
 
