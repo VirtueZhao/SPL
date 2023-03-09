@@ -3,6 +3,11 @@
 This repo contains the source code of our project, "Self-Paced Data Augmentation", which studies how to improve the generalization ability of models to unseen domains by augmenting and presenting examples in a meaningful order.
 We design a self-paced training scheduler that organizes example augmentation and presentation based on their difficulty, and introduce a gradient confidence difficulty measure that captures the magnitude and uncertainty of decision boundary changes caused by the original example and its augmented version.
 
+# Get Started
+## 1. Datasets
+## 2. Models
+## 3. Difficulty Measures
+## 4. Training
 
 Current Available Base Augmentation Method: [ERM, CrossGrad, DomainMix, DDAIG]
 
