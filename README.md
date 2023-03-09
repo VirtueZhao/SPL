@@ -6,8 +6,8 @@ We design a self-paced training scheduler that organizes example augmentation an
 # Get Started
 ## 1. Datasets
 Our framework currently support five popular benchmark datasets:
-* Digits: 
-* PACS
+* **Digits**: Digits consists of four digit recognition tasks, namely MNIST, MNIST-M, SVHN, and SYN. MNIST contains handwritten digit images, while MNIST-M blends the images in MNIST with random color patches. SVHN contains images of street view house numbers, and SYN contains synthetic digit images with different fonts, backgrounds, and stroke colours. The domain shift in Digits corresponds to font style and background change.
+* **PACS**: 
 * Office_Home
 * VLCS
 * NICO++
