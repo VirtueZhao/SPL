@@ -16,7 +16,7 @@ Our framework currently support five popular benchmark datasets:
 
 * **NICO++**: NICO++ is the latest DG dataset that was constructed in 2022 for OOD (Out-of-Distribution) image classification. The public version contains six domains: Autumn, Dim, Grass, Outdoor, Rock, and Water, where each domain has 60 classes. The domain shift corresponds to the context changes. Compared with the previous four datasets, NICO++ is much larger in scale with 88,866 images in total.
 
-**Note**: Digits, PACS, Office_Home, and VLCS datasets are small. They will be automatically downloaded when you run the codes. 
+**Note**: Digits, PACS, Office_Home, and VLCS datasets are small. They will be automatically downloaded when you run the codes. For the NICO++, please refer to [here](https://nicochallenge.com/dataset).
 
 
 ## 2. Models
