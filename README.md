@@ -5,11 +5,27 @@ We design a self-paced training scheduler that organizes example augmentation an
 
 # Get Started
 ## 1. Datasets
-Our framework currently support five popular benchmark datasets: [Digits, PACS, Office_Home, VLCS, NICO++]
+Our framework currently support five popular benchmark datasets: 
+* Digits
+* PACS
+* Office_Home
+* VLCS
+* NICO++
+
 ## 2. Models
-Our framework currently support four base augmentation methods: [ERM, CrossGrad, DomainMix, DDAIG]
+Our framework currently support four base augmentation methods: 
+* ERM
+* CrossGrad
+* DomainMix
+* DDAIG
+
 ## 3. Difficulty Measures
-Our framework currently support four difficulty measures: [GCDM, Loss, Confidence, Gradients]
+Our framework currently support four difficulty measures:
+* GCDM
+* Loss
+* Confidence
+* Gradients
+
 ## 4. Training
 
 
