@@ -10,7 +10,7 @@ Our framework currently support five popular benchmark datasets:
 
 * **PACS**: PACS consists of four domains, namely Photo (1,670 images), Art Painting (2,048 images), Cartoon (2,344 images) and Sketch (3,929 images). Each domain contains seven categories. The domain shift in PACS corresponds to image style changes.
 
-* **Office_Home**:
+* **Office_Home**: Office-Home is initially introduced for domain adaptation and getting popular in the DG community. It contains four domains: Artistic, Clipart, Product, and Real World, where each domain has 65 classes related to office and home objects. There are 15,500 images in total, with an average of around 70 images per class and a maximum of 99 images in each class. The domain shift corresponds to the background, viewpoint and image style changes.
  
 * **VLCS**: 
 
