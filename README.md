@@ -21,10 +21,13 @@ Our framework currently support five popular benchmark datasets:
 
 ## 2. Models
 Our framework currently support four base augmentation methods: 
-* ERM
-* CrossGrad
-* DomainMix
-* DDAIG
+* **ERM**: Empirical Risk Minimization (ERM) directly combines data from all source domains for model training without any DG techniques.
+
+* **[CrossGrad (2018 ICLR)](https://openreview.net/forum?id=r1Dx7fbCW)**: CrossGrad leverages adversarial perturbation to augment data by adding its gradient from a domain classifier.
+
+* **DomainMix**:
+
+* **DDAIG**:
 
 ## 3. Difficulty Measures
 Our framework currently support four difficulty measures:
