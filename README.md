@@ -5,12 +5,15 @@ We design a self-paced training scheduler that organizes example augmentation an
 
 # Get Started
 ## 1. Datasets
-Our framework currently support five popular benchmark datasets: 
-* Digits
+Our framework currently support five popular benchmark datasets:
+* Digits: 
 * PACS
 * Office_Home
 * VLCS
 * NICO++
+
+**Note**: Digits, PACS, Office_Home, and VLCS datasets are small. They will be automatically downloaded when you run the codes. 
+
 
 ## 2. Models
 Our framework currently support four base augmentation methods: 
