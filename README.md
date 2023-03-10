@@ -32,10 +32,10 @@ Our framework currently support four base augmentation methods:
 
 ## 3. Difficulty Measures
 Our framework currently support four difficulty measures:
-* GCDM
-* Loss
-* Confidence
-* Gradients
+* **GCDM**: Gradient Confidence Difficulty Measure.
+* **Loss**: Cross Entropy in Image Classification.
+* **Confidence**: Prediction Confidence.
+* **Gradients**: Gradients with respect to input data.
 
 ## 4. Training
 
